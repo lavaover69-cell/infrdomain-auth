@@ -11,15 +11,18 @@
       padding: 40px;
     }
 
-    input {
-      padding: 10px;
-      width: 250px;
-      margin: 10px;
+    button {
+      padding: 12px 18px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #4c7dff;
+      color: white;
     }
 
-    button {
-      padding: 10px 15px;
-      cursor: pointer;
+    button:hover {
+      background: #2f5fff;
     }
 
     #status {
@@ -31,51 +34,35 @@
 
 <body>
 
-  <h1>Roblox Verification</h1>
+  <h1>Roblox Account Verification</h1>
 
-  <p>Enter your Roblox username:</p>
+  <p>Connect your Roblox account to unlock trading</p>
 
-  <input id="rbxName" placeholder="Roblox username">
-
-  <br>
-
-  <button onclick="verify()">Verify Account</button>
+  <button onclick="connectRoblox()">Connect Roblox</button>
 
   <p id="status"></p>
 
-<script type="module">
+<script>
+async function connectRoblox() {
+  try {
+    document.getElementById("status").innerText = "Redirecting to Roblox...";
 
-// Firebase CDN (you will paste your config here)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    // Call your Vercel backend
+    const res = await fetch("/api/start-roblox-login");
 
-// 🔴 PASTE YOUR FIREBASE CONFIG HERE
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
-};
+    const data = await res.json();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    if (data.redirect) {
+      window.location.href = data.redirect;
+    } else {
+      document.getElementById("status").innerText = "Failed to start login.";
+    }
 
-// fake verification for now (we replace with Roblox OAuth next)
-window.verify = async function () {
-  const name = document.getElementById("rbxName").value;
-
-  if (!name) return;
-
-  // store as "verified user"
-  await setDoc(doc(db, "users", name), {
-    robloxName: name,
-    verified: true,
-    time: Date.now()
-  });
-
-  document.getElementById("status").innerText =
-    "Verified (temporary system ready for OAuth upgrade)";
-};
-
+  } catch (err) {
+    console.error(err);
+    document.getElementById("status").innerText = "Error connecting to server.";
+  }
+}
 </script>
 
 </body>
